@@ -1,13 +1,35 @@
 
 
 % Ejercicio 1
-matriz(F, C, M) :- completar("Ejercicio 1").
+% matriz(F, C, M) :- completar("Ejercicio 1").
+matriz(0,_, []).
+matriz(F, C, [M | MS]) :- F > 0, length(M, C), Fm1 is F - 1, matriz(Fm1, C, MS).
+% Duda: permite pedir más soluciones, pero está implícito en el esquema recursivo.
+
 
 % Ejercicio 2
-replicar(X, N, L) :- completar("Ejercicio 2").
+% replicar(X, N, L) :- completar("Ejercicio 2").
+replicar(_, 0, []).
+replicar(X, N, [X | Xs]) :- length(Xs, Nm1), N is Nm1+1, replicar(X, Nm1, Xs).
+
 
 % Ejercicio 3
-transponer(_, _) :- completar("Ejercicio 3").
+% transponer(_, _) :- completar("Ejercicio 3").
+transponer([], []).
+transponer([[] | T], []). % Duda (?)
+transponer(Matriz, [Fila | TailFilas]) :-
+	filaCorrecta(Matriz, Fila),
+	sacarPrimerColumna(Matriz, MatrizRecortada),
+	transponer(MatrizRecortada, TailFilas).
+% filaCorrecta(Matriz, Columna).
+filaCorrecta([], []).
+filaCorrecta([[X | _] | TailMatriz], [X | TailFila]) :- 
+	filaCorrecta(TailMatriz, TailFila).
+% sacarPrimerColumna(Matriz, MatrizRecortada)
+sacarPrimerColumna([], []).
+sacarPrimerColumna([[_ | TailPrimerFila] | TailMatriz], [TailPrimerFila | TailFilas]) :-
+	sacarPrimerColumna(TailMatriz, TailFilas).
+
 
 % Predicado dado armarNono/3
 armarNono(RF, RC, nono(M, RS)) :-
@@ -22,14 +44,24 @@ armarNono(RF, RC, nono(M, RS)) :-
 zipR([], [], []).
 zipR([R|RT], [L|LT], [r(R,L)|T]) :- zipR(RT, LT, T).
 
+
 % Ejercicio 4
-pintadasValidas(_) :- completar("Ejercicio 4").
+% pintadasValidas(_) :- completar("Ejercicio 4").
+pintadasValidas(r([], _)).
+pintadasValidas(r([X | Xs], Celda)).
+
+pintar(0, _).
+pintar(N, [_ | Ls]) :- append([x], Ls, L), Nm1 is N-1, length(Ls, Len), Len >= Nm1, pintar(Nm1, Ls).
+
+
 
 % Ejercicio 5
 resolverNaive(_) :-  completar("Ejercicio 5").
 
+
 % Ejercicio 6
 pintarObligatorias(_) :- completar("Ejercicio 6").
+
 
 % Predicado dado combinarCelda/3
 combinarCelda(A, B, _) :- var(A), var(B).
@@ -38,11 +70,14 @@ combinarCelda(A, B, _) :- var(A), nonvar(B).
 combinarCelda(A, B, A) :- nonvar(A), nonvar(B), A = B.
 combinarCelda(A, B, _) :- nonvar(A), nonvar(B), A \== B.
 
+
 % Ejercicio 7
 deducir1Pasada(_) :- completar("Ejercicio 7").
 
+
 % Predicado dado
 cantidadVariablesLibres(T, N) :- term_variables(T, LV), length(LV, N).
+
 
 % Predicado dado
 deducirVariasPasadas(NN) :-
@@ -52,15 +87,19 @@ deducirVariasPasadas(NN) :-
 	cantidadVariablesLibres(M, VF), % VF = cantidad de celdas sin instanciar en M en este punto
 	deducirVariasPasadasCont(NN, VI, VF).
 
+
 % Predicado dado
 deducirVariasPasadasCont(_, A, A). % Si VI = VF entonces no hubo más cambios y frenamos.
 deducirVariasPasadasCont(NN, A, B) :- A =\= B, deducirVariasPasadas(NN).
 
+
 % Ejercicio 8
 restriccionConMenosLibres(_, _) :- completar("Ejercicio 8").
 
+
 % Ejercicio 9
 resolverDeduciendo(NN) :- completar("Ejercicio 9").
+
 
 % Ejercicio 10
 solucionUnica(NN) :- completar("Ejercicio 10").
