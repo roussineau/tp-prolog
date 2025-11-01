@@ -48,11 +48,28 @@ zipR([R|RT], [L|LT], [r(R,L)|T]) :- zipR(RT, LT, T).
 % Ejercicio 4
 % pintadasValidas(_) :- completar("Ejercicio 4").
 pintadasValidas(r([], _)).
-pintadasValidas(r([X | Xs], Celda)).
 
-pintar(0, _).
-pintar(N, [_ | Ls]) :- append([x], Ls, L), Nm1 is N-1, length(Ls, Len), Len >= Nm1, pintar(Nm1, Ls).
+% dejo blanco y pinto
+pintadasValidas(r([X | Xs], [Y, o | Pintado])):- %faltaria ver el caso donde a Y le sigue vacio, es decir leng(Celda,1)  
+    pintarBloque(X, Pintado),
+    append(Pintado, CeldaDespuesDeLaPartePintada, Celda), 
+    pintadasValidas(r(Xs, CeldaDespuesDeLaPartePintada)).
 
+%pinto ahora
+pintadasValidas(r([X | Xs], Celda)):- 
+    pintarBloque(X, Pintado), 
+    append(Pintado, Final, Celda), 
+    pintadasValidas(r(Xs, Final)).
+
+
+% pintarBloque()
+pintarBloque(N, L) :- N > 0, length(X, N), todoPintado(X), sublista(X, L).
+% todoPintado()
+todoPintado([]).
+todoPintado([x | R]) :- todoPintado(R).
+% sublista()
+sublista([], _).
+sublista(S, L) :- append(_, P, L), append(S, _, P), S \= [].
 
 
 % Ejercicio 5
