@@ -1,34 +1,50 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                                  %%
+%%  Funciones generales implementadas por nosotros  %%
+%%                                                  %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%! sublista(?Sub, ?Lista).
+sublista([], _).
+sublista(S, L) :- append(_, P, L), append(S, _, P), S \= [].
+
+%! headTail(?List, ?Head, ?Tail)
+headTail([H|T], H, T).
 
 
 % Ejercicio 1
-% matriz(F, C, M) :- completar("Ejercicio 1").
+%! matriz(F, C, M).
 matriz(0,_, []).
 matriz(F, C, [M | MS]) :- F > 0, length(M, C), Fm1 is F - 1, matriz(Fm1, C, MS).
 % Duda: permite pedir más soluciones, pero está implícito en el esquema recursivo.
 
 
 % Ejercicio 2
-% replicar(X, N, L) :- completar("Ejercicio 2").
+%! replicar(X, N, L).
 replicar(_, 0, []).
-replicar(X, N, [X | Xs]) :- length(Xs, Nm1), N is Nm1+1, replicar(X, Nm1, Xs).
+replicar(X, N, [X | Xs]) :- N > 0, Nm1 is N-1, replicar(X, Nm1, Xs).
 
 
 % Ejercicio 3
-% transponer(_, _) :- completar("Ejercicio 3").
+%! transponer(_, _).
 transponer([], []).
-transponer([[] | T], []). % Duda (?)
-transponer(Matriz, [Fila | TailFilas]) :-
-	filaCorrecta(Matriz, Fila),
-	sacarPrimerColumna(Matriz, MatrizRecortada),
-	transponer(MatrizRecortada, TailFilas).
-% filaCorrecta(Matriz, Columna).
-filaCorrecta([], []).
-filaCorrecta([[X | _] | TailMatriz], [X | TailFila]) :- 
-	filaCorrecta(TailMatriz, TailFila).
-% sacarPrimerColumna(Matriz, MatrizRecortada)
-sacarPrimerColumna([], []).
-sacarPrimerColumna([[_ | TailPrimerFila] | TailMatriz], [TailPrimerFila | TailFilas]) :-
-	sacarPrimerColumna(TailMatriz, TailFilas).
+transponer([[]|_], []).
+transponer(M, [Fila|Filas]) :-
+    maplist(headTail, M, Fila, Restos),
+    transponer(Restos, Filas).
+
+% transponer(Matriz, [Fila | TailFilas]) :-
+% 	filaCorrecta(Matriz, Fila),
+% 	sacarPrimerColumna(Matriz, MatrizRecortada),
+% 	transponer(MatrizRecortada, TailFilas).
+% % filaCorrecta(Matriz, Columna).
+% filaCorrecta([], []).
+% filaCorrecta([[X | _] | TailMatriz], [X | TailFila]) :- 
+% 	filaCorrecta(TailMatriz, TailFila).
+% % sacarPrimerColumna(Matriz, MatrizRecortada)
+% sacarPrimerColumna([], []).
+% sacarPrimerColumna([[_ | TailPrimerFila] | TailMatriz], [TailPrimerFila | TailFilas]) :-
+% 	sacarPrimerColumna(TailMatriz, TailFilas).
 
 
 % Predicado dado armarNono/3
@@ -46,30 +62,60 @@ zipR([R|RT], [L|LT], [r(R,L)|T]) :- zipR(RT, LT, T).
 
 
 % Ejercicio 4
-% pintadasValidas(_) :- completar("Ejercicio 4").
-pintadasValidas(r([], _)).
 
-% dejo blanco y pinto
-pintadasValidas(r([X | Xs], [Y, o | Pintado])):- %faltaria ver el caso donde a Y le sigue vacio, es decir leng(Celda,1)  
-    pintarBloque(X, Pintado),
-    append(Pintado, CeldaDespuesDeLaPartePintada, Celda), 
-    pintadasValidas(r(Xs, CeldaDespuesDeLaPartePintada)).
+% Idea para encarar el ejercicio: vamos a usar el tip 3.
+% Dada una pintada válida, podemos armar una lista cuyos primer y último elemento son >= 0,
+% y el resto son >=1 intercalando pintadas y espacios en blanco.
+% Para armar esta lista, primero vamos a poner los intercalados (los espacios en blanco entre pintadas),
+% y luego agregarle las puntas >=0. De eso se encargan los predicados intercalar() y bordear() respectivamente.
+% Una vez armada la lista, solo nos queda poner una o (dejar en blanco) las posiciones
+% impares (arrancando a contar desde el 1), y poner una x (pintar) las posiciones pares. A efectos
+% prácticos, les pusimos simplemente pintarImpar() y pintarPar() a los predicados que se ocupan de esto.
 
-%pinto ahora
-pintadasValidas(r([X | Xs], Celda)):- 
-    pintarBloque(X, Pintado), 
-    append(Pintado, Final, Celda), 
-    pintadasValidas(r(Xs, Final)).
+%! pintadasValidas(r(Restricciones, Celdas)).
+pintadasValidas(r(Restricciones, Celdas)) :-
+	length(Celdas, CantCeldas), % esto seguro que lo tengo que tener, sino no tiene sentido pintar algo que no conozco su longitud
+	intercalar(Restricciones, Intercaladas, CantCeldas),
+	bordear(Intercaladas, Bordeadas, CantCeldas),
+	pintarImpar(Bordeadas, Celdas). % tengo garantizado que Bordeadas va a tener longitud impar.
 
+%! intercalar(Negros, NegrosIntercaladosConBlancos, CantCasilleros)	
+intercalar([], [], _).
+intercalar([E], [E], _).
+intercalar([E1, E2 | Resto], [E1, I1, E2 | RestoIntercalado], CantCasilleros) :-
+	P1 is E1 + E2,
+	sumlist(Resto, P2),
+	Pintados is P1 + P2,
+	length([E1, E2 | Resto], CantRestricciones),
+	Margen is CantCasilleros + 2 - CantRestricciones,
+	Cota is Margen - Pintados,
+	between(1, Cota, I1),
+	CantCasillerosRestantes is CantCasilleros - E1 - I1,
+	intercalar([E2 | Resto], [E2 | RestoIntercalado], CantCasillerosRestantes).
 
-% pintarBloque()
-pintarBloque(N, L) :- N > 0, length(X, N), todoPintado(X), sublista(X, L).
-% todoPintado()
-todoPintado([]).
-todoPintado([x | R]) :- todoPintado(R).
-% sublista()
-sublista([], _).
-sublista(S, L) :- append(_, P, L), append(S, _, P), S \= [].
+%! bordear(NegrosIntercaladosConBlancos, BlancosIntercaladosConNegros, CantCasilleros).
+bordear([], [CantCasilleros], CantCasilleros).
+bordear(Restricciones, [B1 | ConCola], CantCasilleros) :-
+	sumlist(Restricciones, Ocupadas),
+	Margen1 is CantCasilleros - Ocupadas,
+	append(Restricciones, [B2], ConCola),
+	between(0, Margen1, B1),
+	Margen2 is CantCasilleros - Ocupadas - B1,
+	between(0, Margen2, B2),
+	sumlist([B1 | ConCola], CantCasilleros).
+
+%! pintarPar(Restricciones, Pintado).
+pintarPar([], []).
+pintarPar([N | Resto], Pintado) :-
+	replicar(x, N, Negros),
+	pintarImpar(Resto, RestoPintado),
+	append(Negros, RestoPintado, Pintado).
+
+% pintarImpar(Restricciones, Pintado).
+pintarImpar([B | Resto], Pintado) :-
+	replicar(o, B, Blancos),
+	pintarPar(Resto, RestoPintado),
+	append(Blancos, RestoPintado, Pintado).
 
 
 % Ejercicio 5
