@@ -67,42 +67,39 @@ zipR([R|RT], [L|LT], [r(R,L)|T]) :- zipR(RT, LT, T).
 % Dada una pintada válida, podemos armar una lista cuyos primer y último elemento son >= 0,
 % y el resto son >=1 intercalando pintadas y espacios en blanco.
 % Para armar esta lista, primero vamos a poner los intercalados (los espacios en blanco entre pintadas),
-% y luego agregarle las puntas >=0. De eso se encargan los predicados intercalar() y bordear() respectivamente.
+% y luego agregarle las puntas >=0. De eso se encargan los predicados intercalarBlancos() y bordesBlancos() respectivamente.
 % Una vez armada la lista, solo nos queda poner una o (dejar en blanco) las posiciones
 % impares (arrancando a contar desde el 1), y poner una x (pintar) las posiciones pares. A efectos
 % prácticos, les pusimos simplemente pintarImpar() y pintarPar() a los predicados que se ocupan de esto.
 
-%! pintadasValidas(r(Restricciones, Celdas)).
-pintadasValidas(r(Restricciones, Celdas)) :-
+%! pintadasValidas(r(Negros, Celdas)).
+pintadasValidas(r(Negros, Celdas)) :-
 	length(Celdas, CantCeldas), % esto seguro que lo tengo que tener, sino no tiene sentido pintar algo que no conozco su longitud
-	intercalar(Restricciones, Intercaladas, CantCeldas),
-	bordear(Intercaladas, Bordeadas, CantCeldas),
+	intercalarBlancos(Negros, CantCeldas, Intercaladas),
+	bordesBlancos(Intercaladas, CantCeldas, Bordeadas),
 	pintarImpar(Bordeadas, Celdas). % tengo garantizado que Bordeadas va a tener longitud impar.
 
-%! intercalar(Negros, NegrosIntercaladosConBlancos, CantCasilleros)	
-intercalar([], [], _).
-intercalar([E], [E], _).
-intercalar([E1, E2 | Resto], [E1, I1, E2 | RestoIntercalado], CantCasilleros) :-
-	P1 is E1 + E2,
-	sumlist(Resto, P2),
-	Pintados is P1 + P2,
-	length([E1, E2 | Resto], CantRestricciones),
-	Margen is CantCasilleros + 2 - CantRestricciones,
-	Cota is Margen - Pintados,
-	between(1, Cota, I1),
-	CantCasillerosRestantes is CantCasilleros - E1 - I1,
-	intercalar([E2 | Resto], [E2 | RestoIntercalado], CantCasillerosRestantes).
+%! intercalarBlancos(Negros, NegrosIntercaladosConBlancos, CantCeldas)	
+intercalarBlancos([], _, []).
+intercalarBlancos([N], _, [N]).
+intercalarBlancos([N1, N2 | Resto], CantCeldas, [N1, B1, N2 | RestoIntercalado]) :-
+	sumlist([N1, N2 | Resto], Pintados),
+	length([N1, N2 | Resto], CantRestricciones),
+	Cota is CantCeldas + 2 - CantRestricciones - Pintados,
+	between(1, Cota, B1),
+	CantCeldasRestantes is CantCeldas - N1 - B1,
+	intercalarBlancos([N2 | Resto], CantCeldasRestantes, [N2 | RestoIntercalado]).
 
-%! bordear(NegrosIntercaladosConBlancos, BlancosIntercaladosConNegros, CantCasilleros).
-bordear([], [CantCasilleros], CantCasilleros).
-bordear(Restricciones, [B1 | ConCola], CantCasilleros) :-
+%! bordesBlancos(NegrosIntercaladosConBlancos, BlancosIntercaladosConNegros, CantCeldas).
+bordesBlancos([], CantCeldas, [CantCeldas]).
+bordesBlancos(Restricciones, CantCeldas, [B1 | ConCola]) :-
 	sumlist(Restricciones, Ocupadas),
-	Margen1 is CantCasilleros - Ocupadas,
-	append(Restricciones, [B2], ConCola),
+	Margen1 is CantCeldas - Ocupadas,
 	between(0, Margen1, B1),
-	Margen2 is CantCasilleros - Ocupadas - B1,
+	Margen2 is CantCeldas - Ocupadas - B1,
 	between(0, Margen2, B2),
-	sumlist([B1 | ConCola], CantCasilleros).
+	append(Restricciones, [B2], ConCola),
+	sumlist([B1 | ConCola], CantCeldas).
 
 %! pintarPar(Restricciones, Pintado).
 pintarPar([], []).
