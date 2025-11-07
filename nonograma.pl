@@ -11,6 +11,11 @@ sublista(S, L) :- append(_, P, L), append(S, _, P), S \= [].
 %! headTail(?List, ?Head, ?Tail)
 headTail([H|T], H, T).
 
+% 
+% listaDec(1, [1]).
+% listaDec(N, [N | Resto]) :- N>1, Nm1 is N-1, listaDec(Nm1, Resto).
+
+% listaNat(N, L) :- listaDec(N, D), reverse(D, L).
 
 % Ejercicio 1
 %! matriz(F, C, M).
@@ -70,14 +75,14 @@ zipR([R|RT], [L|LT], [r(R,L)|T]) :- zipR(RT, LT, T).
 % y luego agregarle las puntas >=0. De eso se encargan los predicados intercalarBlancos() y bordesBlancos() respectivamente.
 % Una vez armada la lista, solo nos queda poner una o (dejar en blanco) las posiciones
 % impares (arrancando a contar desde el 1), y poner una x (pintar) las posiciones pares. A efectos
-% prácticos, les pusimos simplemente pintarImpar() y pintarPar() a los predicados que se ocupan de esto.
+% prácticos, les pusimos simplemente pintarBlanco() y pintarNegro() a los predicados que se ocupan de esto.
 
 %! pintadasValidas(r(Negros, Celdas)).
 pintadasValidas(r(Negros, Celdas)) :-
 	length(Celdas, CantCeldas), % esto seguro que lo tengo que tener, sino no tiene sentido pintar algo que no conozco su longitud
 	intercalarBlancos(Negros, CantCeldas, Intercaladas),
 	bordesBlancos(Intercaladas, CantCeldas, Bordeadas),
-	pintarImpar(Bordeadas, Celdas). % tengo garantizado que Bordeadas va a tener longitud impar.
+	pintarBlanco(Bordeadas, Celdas). % tengo garantizado que Bordeadas va a tener longitud impar.
 
 %! intercalarBlancos(Negros, NegrosIntercaladosConBlancos, CantCeldas)	
 intercalarBlancos([], _, []).
@@ -101,26 +106,29 @@ bordesBlancos(Restricciones, CantCeldas, [B1 | ConCola]) :-
 	append(Restricciones, [B2], ConCola),
 	sumlist([B1 | ConCola], CantCeldas).
 
-%! pintarPar(Restricciones, Pintado).
-pintarPar([], []).
-pintarPar([N | Resto], Pintado) :-
+%! pintarNegro(Restricciones, Pintado).
+pintarNegro([], []).
+pintarNegro([N | Resto], Pintado) :-
 	replicar(x, N, Negros),
-	pintarImpar(Resto, RestoPintado),
+	pintarBlanco(Resto, RestoPintado),
 	append(Negros, RestoPintado, Pintado).
 
-% pintarImpar(Restricciones, Pintado).
-pintarImpar([B | Resto], Pintado) :-
+% pintarBlanco(Restricciones, Pintado).
+pintarBlanco([B | Resto], Pintado) :-
 	replicar(o, B, Blancos),
-	pintarPar(Resto, RestoPintado),
+	pintarNegro(Resto, RestoPintado),
 	append(Blancos, RestoPintado, Pintado).
 
 
 % Ejercicio 5
-resolverNaive(_) :-  completar("Ejercicio 5").
+% resolverNaive(NN).
+resolverNaive(nono(_, Restricciones)) :-
+	maplist(pintadasValidas, Restricciones).
 
 
 % Ejercicio 6
-pintarObligatorias(_) :- completar("Ejercicio 6").
+% pintarObligatorias(_) :- completar("Ejercicio 6").
+
 
 
 % Predicado dado combinarCelda/3
