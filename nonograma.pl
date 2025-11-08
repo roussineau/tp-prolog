@@ -9,7 +9,7 @@ sublista([], _).
 sublista(S, L) :- append(_, P, L), append(S, _, P), S \= [].
 
 %! headTail(?List, ?Head, ?Tail)
-headTail([H|T], H, T).
+headTail([H | T], H, T).
 
 % 
 % listaDec(1, [1]).
@@ -34,7 +34,7 @@ replicar(X, N, [X | Xs]) :- N > 0, Nm1 is N-1, replicar(X, Nm1, Xs).
 %! transponer(_, _).
 transponer([], []).
 transponer([[]|_], []).
-transponer(M, [Fila|Filas]) :-
+transponer(M, [Fila | Filas]) :-
     maplist(headTail, M, Fila, Restos),
     transponer(Restos, Filas).
 
@@ -128,15 +128,16 @@ resolverNaive(nono(_, Restricciones)) :-
 
 % Ejercicio 6
 %! pintarObligatorias(R).
-pintarObligatorias(r(Negros, Lista)) :- 
-	todasPintadasValidas(r(Negros, Lista), Pintadas),
+pintarObligatorias(r(Negros, PintadasObligatorias)) :- 
+	listaPintadasValidas(r(Negros, PintadasObligatorias), Pintadas),
 	transponer(Pintadas, PT),
-	maplist(combinarCeldas, PT, Lista).
+	maplist(combinarCeldas, PT, PintadasObligatorias).
 
-%! todasPintadasValidas(?R, ?L).
-todasPintadasValidas(Restriccion, ListaListas) :-
+%! listaPintadasValidas(?R, ?L).
+listaPintadasValidas(Restriccion, ListaPintadasValidas) :-
 	bagof(Restriccion, pintadasValidas(Restriccion), ListaRestricciones),
-	maplist(pintada, ListaRestricciones, ListaListas).
+	maplist(pintada, ListaRestricciones, ListaPintadasValidas).
+	% Duda: necesidad de usar pintada.
 
 %! combinarCeldas(+Celdas, ?Celda).
 combinarCeldas([C], C).
@@ -157,7 +158,9 @@ combinarCelda(A, B, _) :- nonvar(A), nonvar(B), A \== B.
 
 
 % Ejercicio 7
-deducir1Pasada(_) :- completar("Ejercicio 7").
+%! deducir1Pasada(+N).
+deducir1Pasada(nono(_, RS)) :-
+	maplist(pintarObligatorias, RS).
 
 
 % Predicado dado
@@ -179,15 +182,33 @@ deducirVariasPasadasCont(NN, A, B) :- A =\= B, deducirVariasPasadas(NN).
 
 
 % Ejercicio 8
-restriccionConMenosLibres(_, _) :- completar("Ejercicio 8").
+%! restriccionConMenosLibres(+NN, -R).
+restriccionConMenosLibres(nono(_, Rs), R) :-
+	member(R, Rs), cantidadVariablesLibres(R, CR), CR > 0,
+	not((member(R2, Rs), cantidadVariablesLibres(R2, CR2), CR2 > 0, CR2 < CR)).
 
 
 % Ejercicio 9
-resolverDeduciendo(NN) :- completar("Ejercicio 9").
+%! resolverDeduciendo(+NN).
+resolverDeduciendo(NN) :-
+	deducirVariasPasadas(NN),
+	cantidadVariablesLibres(NN, C),
+	resolverDeduciendoCont(NN, C),
+	deducirVariasPasadas(NN).
+	
+resolverDeduciendoCont(_, 0).
+resolverDeduciendoCont(NN, FV) :-
+	FV > 0,
+	restriccionConMenosLibres(NN, R), !,
+	pintadasValidas(R),
+	cantidadVariablesLibres(NN, FVN),
+	resolverDeduciendoCont(NN, FVN).
 
 
 % Ejercicio 10
-solucionUnica(NN) :- completar("Ejercicio 10").
+%! solucionUnica(+NN).
+solucionUnica(NN) :- bagof(NN, resolverDeduciendo(NN), L), length(L, 1).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                              %
