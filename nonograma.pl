@@ -113,7 +113,7 @@ pintarNegro([N | Resto], Pintado) :-
 	pintarBlanco(Resto, RestoPintado),
 	append(Negros, RestoPintado, Pintado).
 
-% pintarBlanco(Restricciones, Pintado).
+%! pintarBlanco(Restricciones, Pintado).
 pintarBlanco([B | Resto], Pintado) :-
 	replicar(o, B, Blancos),
 	pintarNegro(Resto, RestoPintado),
@@ -121,14 +121,31 @@ pintarBlanco([B | Resto], Pintado) :-
 
 
 % Ejercicio 5
-% resolverNaive(NN).
+%! resolverNaive(NN).
 resolverNaive(nono(_, Restricciones)) :-
 	maplist(pintadasValidas, Restricciones).
 
 
 % Ejercicio 6
-% pintarObligatorias(_) :- completar("Ejercicio 6").
+%! pintarObligatorias(R).
+pintarObligatorias(r(Negros, Lista)) :- 
+	todasPintadasValidas(r(Negros, Lista), Pintadas),
+	transponer(Pintadas, PT),
+	maplist(combinarCeldas, PT, Lista).
 
+%! todasPintadasValidas(?R, ?L).
+todasPintadasValidas(Restriccion, ListaListas) :-
+	bagof(Restriccion, pintadasValidas(Restriccion), ListaRestricciones),
+	maplist(pintada, ListaRestricciones, ListaListas).
+
+%! combinarCeldas(+Celdas, ?Celda).
+combinarCeldas([C], C).
+combinarCeldas([C1, C2 | Cs], C) :-
+	combinarCelda(C1, C2, C3),
+	combinarCeldas([C3 | Cs], C).
+
+% pintada(?R, ?L).
+pintada(r(_, L), L).
 
 
 % Predicado dado combinarCelda/3
