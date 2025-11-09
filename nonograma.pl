@@ -38,58 +38,50 @@ zipR([R|RT], [L|LT], [r(R,L)|T]) :- zipR(RT, LT, T).
 
 
 % Ejercicio 4
-/*
-	Idea para encarar el ejercicio: vamos a usar el tip 3.
-	Dada una pintada válida, podemos armar una lista cuyos primer y último elemento son >= 0,
-	y el resto son >=1 intercalando pintadas y espacios en blanco.
-	Para armar esta lista, primero vamos a poner los intercalados (los espacios en blanco entre pintadas),
-	y luego agregarle las puntas >=0. De eso se encargan los predicados intercalarBlancos() y bordesBlancos() respectivamente.
-	Una vez armada la lista, solo nos queda poner una o (dejar en blanco) las posiciones
-	impares (arrancando a contar desde el 1), y poner una x (pintar) las posiciones pares. A efectos
-	prácticos, les pusimos simplemente pintarBlanco() y pintarNegro() a los predicados que se ocupan de esto.
-*/
-
 %! pintadasValidas(+R).
 pintadasValidas(r(Negros, Celdas)) :-
 	length(Celdas, CantCeldas), % esto seguro que lo tengo que tener, sino no tiene sentido pintar algo que no conozco su longitud
-	intercalarBlancos(Negros, CantCeldas, Intercaladas),
-	bordesBlancos(Intercaladas, CantCeldas, Bordeadas),
-	pintarBlanco(Bordeadas, Celdas). % tengo garantizado que Bordeadas va a tener longitud impar.
+	listaBlancos(Negros, CantCeldas, Blancos),
+	zip(Blancos, Negros, Pintadas),
+	pintarBlanco(Pintadas, Celdas).
 
-%! intercalarBlancos(Negros, NegrosIntercaladosConBlancos, CantCeldas)	
-intercalarBlancos([], _, []).
-intercalarBlancos([N], _, [N]).
-intercalarBlancos([N1, N2 | Resto], CantCeldas, [N1, B1, N2 | RestoIntercalado]) :-
-	sumlist([N1, N2 | Resto], Pintados),
-	length([N1, N2 | Resto], CantRestricciones),
-	Cota is CantCeldas + 2 - CantRestricciones - Pintados,
-	between(1, Cota, B1),
-	CantCeldasRestantes is CantCeldas - N1 - B1,
-	intercalarBlancos([N2 | Resto], CantCeldasRestantes, [N2 | RestoIntercalado]).
+%! listaBlancos(+ListaNegros, +CantCeldas, -ListaBlancos).
+listaBlancos([], CantCeldas, [CantCeldas]).
+listaBlancos(ListaNegros, CantCeldas, [Principio | ConFinal]) :-
+	length(ListaNegros, CantNegros),
+	sumlist(ListaNegros, SumaNegros),
+	CantBlancos is CantNegros + 1,
+	SumaBlancos is CantCeldas - SumaNegros,
+	generarListas(CantBlancos, SumaBlancos, [Principio | ConFinal]),
+	append(Medio, [_], ConFinal),
+	not(member(0, Medio)).
 
-%! bordesBlancos(NegrosIntercaladosConBlancos, BlancosIntercaladosConNegros, CantCeldas).
-bordesBlancos([], CantCeldas, [CantCeldas]).
-bordesBlancos(Restricciones, CantCeldas, [B1 | ConCola]) :-
-	sumlist(Restricciones, Ocupadas),
-	Margen1 is CantCeldas - Ocupadas,
-	between(0, Margen1, B1),
-	Margen2 is CantCeldas - Ocupadas - B1,
-	between(0, Margen2, B2),
-	append(Restricciones, [B2], ConCola),
-	sumlist([B1 | ConCola], CantCeldas).
+%! generarListas(+Longitud, +Suma, -Lista).
+generarListas(0, _, []).
+generarListas(L, Suma, [I | Resto]) :-
+	L > 0,
+	between(0, Suma, I),
+	SiguienteSuma is Suma - I,
+	Lm1 is L-1,
+	generarListas(Lm1, SiguienteSuma, Resto),
+	sumlist([I | Resto], Suma).
 
-%! pintarNegro(Restricciones, Pintado).
+%! zip(+L1, +L2, -L3).
+zip([], L, L).
+zip([H | T], L, [H | TR]) :- zip(L, T, TR).
+
+%! pintarBlanco(+Restricciones, -Pintado).
+pintarBlanco([B | Resto], Pintado) :-
+	replicar(o, B, Blancos),
+	pintarNegro(Resto, RestoPintado),
+	append(Blancos, RestoPintado, Pintado).
+
+%! pintarNegro(+Restricciones, -Pintado).
 pintarNegro([], []).
 pintarNegro([N | Resto], Pintado) :-
 	replicar(x, N, Negros),
 	pintarBlanco(Resto, RestoPintado),
 	append(Negros, RestoPintado, Pintado).
-
-%! pintarBlanco(Restricciones, Pintado).
-pintarBlanco([B | Resto], Pintado) :-
-	replicar(o, B, Blancos),
-	pintarNegro(Resto, RestoPintado),
-	append(Blancos, RestoPintado, Pintado).
 
 
 % Ejercicio 5
@@ -116,7 +108,7 @@ combinarCeldas([C1, C2 | Cs], C) :-
 	combinarCelda(C1, C2, C3),
 	combinarCeldas([C3 | Cs], C).
 
-% pintada(?R, ?L).
+%! pintada(?R, ?L).
 pintada(r(_, L), L).
 
 

@@ -24,7 +24,7 @@ El tamaño lo calculamos a mano, y luego leímos la consigna 😄 y verificamos 
 
 # Ejercicio 12: Reversibilidad
 
-### Indicar si el predicado replicar/3 es reversible en el segundo argumento. En concreto se pide analizar si `replicar(+Elem, -N, -Lista)` funciona correctamente.
+### Indicar si el predicado `replicar/3` es reversible en el segundo argumento. En concreto se pide analizar si `replicar(+Elem, -N, -Lista)` funciona correctamente.
 
 ```prolog
 %! replicar(+X, +N, -L).
