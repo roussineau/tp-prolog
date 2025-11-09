@@ -1,33 +1,14 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%                                                  %%
-%%  Funciones generales implementadas por nosotros  %%
-%%                                                  %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%! sublista(?Sub, ?Lista).
-sublista([], _).
-sublista(S, L) :- append(_, P, L), append(S, _, P), S \= [].
-
-%! headTail(?List, ?Head, ?Tail)
-headTail([H | T], H, T).
-
-% 
-% listaDec(1, [1]).
-% listaDec(N, [N | Resto]) :- N>1, Nm1 is N-1, listaDec(Nm1, Resto).
-
-% listaNat(N, L) :- listaDec(N, D), reverse(D, L).
-
 % Ejercicio 1
-%! matriz(F, C, M).
+%! matriz(+F, +C, -M).
 matriz(0,_, []).
 matriz(F, C, [M | MS]) :- F > 0, length(M, C), Fm1 is F - 1, matriz(Fm1, C, MS).
-% Duda: permite pedir más soluciones, pero está implícito en el esquema recursivo.
 
 
 % Ejercicio 2
-%! replicar(X, N, L).
+%! replicar(+X, +N, -L).
 replicar(_, 0, []).
 replicar(X, N, [X | Xs]) :- N > 0, Nm1 is N-1, replicar(X, Nm1, Xs).
+% Ejercicio 12: en texttt.md
 
 
 % Ejercicio 3
@@ -38,18 +19,8 @@ transponer(M, [Fila | Filas]) :-
     maplist(headTail, M, Fila, Restos),
     transponer(Restos, Filas).
 
-% transponer(Matriz, [Fila | TailFilas]) :-
-% 	filaCorrecta(Matriz, Fila),
-% 	sacarPrimerColumna(Matriz, MatrizRecortada),
-% 	transponer(MatrizRecortada, TailFilas).
-% % filaCorrecta(Matriz, Columna).
-% filaCorrecta([], []).
-% filaCorrecta([[X | _] | TailMatriz], [X | TailFila]) :- 
-% 	filaCorrecta(TailMatriz, TailFila).
-% % sacarPrimerColumna(Matriz, MatrizRecortada)
-% sacarPrimerColumna([], []).
-% sacarPrimerColumna([[_ | TailPrimerFila] | TailMatriz], [TailPrimerFila | TailFilas]) :-
-% 	sacarPrimerColumna(TailMatriz, TailFilas).
+%! headTail(?List, ?Head, ?Tail)
+headTail([H | T], H, T).
 
 
 % Predicado dado armarNono/3
@@ -288,3 +259,7 @@ mostrarFila(Fila) :-
 mostrarCelda(C) :- nonvar(C), C = x, write('██').
 mostrarCelda(C) :- nonvar(C), C = o, write('░░').
 mostrarCelda(C) :- var(C), write('¿?').
+
+
+%! tam(+N, -T).
+tam(N, (F, C)) :- nn(N, nono([M | Ms], _)), length([M | Ms], F), length(M, C).
