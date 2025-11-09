@@ -5,14 +5,14 @@ matriz(F, C, [M | MS]) :- F > 0, length(M, C), Fm1 is F - 1, matriz(Fm1, C, MS).
 
 
 % Ejercicio 2
-%! replicar(+X, +N, -L).
+%! replicar(+Elem, +N, -Lista).
 replicar(_, 0, []).
 replicar(X, N, [X | Xs]) :- N > 0, Nm1 is N-1, replicar(X, Nm1, Xs).
 % Ejercicio 12: en texttt.md
 
 
 % Ejercicio 3
-%! transponer(_, _).
+%! transponer(+M, -MT).
 transponer([], []).
 transponer([[]|_], []).
 transponer(M, [Fila | Filas]) :-
@@ -38,17 +38,18 @@ zipR([R|RT], [L|LT], [r(R,L)|T]) :- zipR(RT, LT, T).
 
 
 % Ejercicio 4
+/*
+	Idea para encarar el ejercicio: vamos a usar el tip 3.
+	Dada una pintada válida, podemos armar una lista cuyos primer y último elemento son >= 0,
+	y el resto son >=1 intercalando pintadas y espacios en blanco.
+	Para armar esta lista, primero vamos a poner los intercalados (los espacios en blanco entre pintadas),
+	y luego agregarle las puntas >=0. De eso se encargan los predicados intercalarBlancos() y bordesBlancos() respectivamente.
+	Una vez armada la lista, solo nos queda poner una o (dejar en blanco) las posiciones
+	impares (arrancando a contar desde el 1), y poner una x (pintar) las posiciones pares. A efectos
+	prácticos, les pusimos simplemente pintarBlanco() y pintarNegro() a los predicados que se ocupan de esto.
+*/
 
-% Idea para encarar el ejercicio: vamos a usar el tip 3.
-% Dada una pintada válida, podemos armar una lista cuyos primer y último elemento son >= 0,
-% y el resto son >=1 intercalando pintadas y espacios en blanco.
-% Para armar esta lista, primero vamos a poner los intercalados (los espacios en blanco entre pintadas),
-% y luego agregarle las puntas >=0. De eso se encargan los predicados intercalarBlancos() y bordesBlancos() respectivamente.
-% Una vez armada la lista, solo nos queda poner una o (dejar en blanco) las posiciones
-% impares (arrancando a contar desde el 1), y poner una x (pintar) las posiciones pares. A efectos
-% prácticos, les pusimos simplemente pintarBlanco() y pintarNegro() a los predicados que se ocupan de esto.
-
-%! pintadasValidas(r(Negros, Celdas)).
+%! pintadasValidas(+R).
 pintadasValidas(r(Negros, Celdas)) :-
 	length(Celdas, CantCeldas), % esto seguro que lo tengo que tener, sino no tiene sentido pintar algo que no conozco su longitud
 	intercalarBlancos(Negros, CantCeldas, Intercaladas),
@@ -92,13 +93,13 @@ pintarBlanco([B | Resto], Pintado) :-
 
 
 % Ejercicio 5
-%! resolverNaive(NN).
+%! resolverNaive(+NN).
 resolverNaive(nono(_, Restricciones)) :-
 	maplist(pintadasValidas, Restricciones).
 
 
 % Ejercicio 6
-%! pintarObligatorias(R).
+%! pintarObligatorias(+R).
 pintarObligatorias(r(Negros, PintadasObligatorias)) :- 
 	listaPintadasValidas(r(Negros, PintadasObligatorias), Pintadas),
 	transponer(Pintadas, PT),
@@ -108,9 +109,8 @@ pintarObligatorias(r(Negros, PintadasObligatorias)) :-
 listaPintadasValidas(Restriccion, ListaPintadasValidas) :-
 	bagof(Restriccion, pintadasValidas(Restriccion), ListaRestricciones),
 	maplist(pintada, ListaRestricciones, ListaPintadasValidas).
-	% Duda: necesidad de usar pintada.
 
-%! combinarCeldas(+Celdas, ?Celda).
+%! combinarCeldas(+Celdas, -Celda).
 combinarCeldas([C], C).
 combinarCeldas([C1, C2 | Cs], C) :-
 	combinarCelda(C1, C2, C3),
@@ -129,7 +129,7 @@ combinarCelda(A, B, _) :- nonvar(A), nonvar(B), A \== B.
 
 
 % Ejercicio 7
-%! deducir1Pasada(+N).
+%! deducir1Pasada(+NN).
 deducir1Pasada(nono(_, RS)) :-
 	maplist(pintarObligatorias, RS).
 
@@ -166,7 +166,8 @@ resolverDeduciendo(NN) :-
 	cantidadVariablesLibres(NN, C),
 	resolverDeduciendoCont(NN, C),
 	deducirVariasPasadas(NN).
-	
+
+%! resolverDeduciendoCont(+NN, +CantFreeVars).
 resolverDeduciendoCont(_, 0).
 resolverDeduciendoCont(NN, FV) :-
 	FV > 0,
