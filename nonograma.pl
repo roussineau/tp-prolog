@@ -163,7 +163,7 @@ restriccionConMenosLibres(nono(_, Rs), R) :-
 % Ejercicio 9
 %! resolverDeduciendo(+NN).
 resolverDeduciendo(NN) :-
-	deducirVariasPasadas(NN),
+	deducirVariasPasadas(NN), % Esta cláusula mejora significativamente la performance para los autómatas totalmente en blanco; en particular el 15 pasa de +30 minutos a ~1 minuto.
 	cantidadVariablesLibres(NN, C),
 	resolverDeduciendoCont(NN, C),
 	deducirVariasPasadas(NN). % Verificar que el intento sea congruente con todas las restricciones.
@@ -172,7 +172,7 @@ resolverDeduciendo(NN) :-
 resolverDeduciendoCont(_, 0). % Si tiene 0 FV, ya está resuelto.
 resolverDeduciendoCont(NN, FV) :-
 	FV > 0,
-	restriccionConMenosLibres(NN, R), !,
+	restriccionConMenosLibres(NN, R), !, % Si no hay pintada que valga para una restricción, el nonograma directamente no tiene solución.
 	pintadasValidas(R),
 	cantidadVariablesLibres(NN, FVN),
 	resolverDeduciendoCont(NN, FVN).
@@ -208,7 +208,7 @@ nn(12, NN) :- armarNono([[9], [1, 1, 1, 1], [10], [2, 1, 1], [1, 1, 1, 1], [1, 1
 nn(13, NN) :- armarNono([[2], [1,1], [1,1], [1,1], [1], [], [2], [1,1], [1,1], [1,1], [1]], [[1], [1,3], [3,1,1], [1,1,3], [3]], NN).
 nn(14, NN) :- armarNono([[1,1], [1,1], [1,1], [2]], [[2], [1,1], [1,1], [1,1]], NN).
 
-% Una sorpresa (tarda +- 67 segundos, y ofrece una versión sonriente y otra seria (?)).
+% Una sorpresa (tarda +-60 segundos, y ofrece una versión sonriente y otra seria (?)).
 nn(15, NN) :- armarNono(
 	[
 [	25
@@ -230,7 +230,6 @@ nn(15, NN) :- armarNono(
 ],[	2
 ],[	
 ],[	4, 1
-],[
 ],[
 ],[
 ],[	4, 3
