@@ -163,7 +163,7 @@ restriccionConMenosLibres(nono(_, Rs), R) :-
 % Ejercicio 9
 %! resolverDeduciendo(+NN).
 resolverDeduciendo(NN) :-
-	deducirVariasPasadas(NN), % Esta cláusula mejora significativamente la performance para los autómatas totalmente en blanco; en particular el 15 pasa de +30 minutos a ~1 minuto.
+	deducirVariasPasadas(NN), % Esta cláusula mejora significativamente la performance para los nonogramas totalmente en blanco; en particular el 15 pasa de +30 minutos a ~1 minuto.
 	cantidadVariablesLibres(NN, C),
 	resolverDeduciendoCont(NN, C),
 	deducirVariasPasadas(NN). % Verificar que el intento sea congruente con todas las restricciones.
