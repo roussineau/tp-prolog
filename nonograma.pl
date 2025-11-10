@@ -103,7 +103,7 @@ resolverNaive(nono(_, Restricciones)) :-
 %! pintarObligatorias(+R).
 pintarObligatorias(r(Negros, PintadasObligatorias)) :- 
 	listaPintadasValidas(r(Negros, PintadasObligatorias), Pintadas),
-	transponer(Pintadas, PT),
+	transponer(Pintadas, PT), % Cada celda es una columna de la matriz Pintadas; si transponemos nos quedan en filas.
 	maplist(combinarCeldas, PT, PintadasObligatorias).
 
 %! listaPintadasValidas(?R, ?L).
