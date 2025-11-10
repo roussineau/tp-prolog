@@ -208,7 +208,7 @@ nn(12, NN) :- armarNono([[9], [1, 1, 1, 1], [10], [2, 1, 1], [1, 1, 1, 1], [1, 1
 nn(13, NN) :- armarNono([[2], [1,1], [1,1], [1,1], [1], [], [2], [1,1], [1,1], [1,1], [1]], [[1], [1,3], [3,1,1], [1,1,3], [3]], NN).
 nn(14, NN) :- armarNono([[1,1], [1,1], [1,1], [2]], [[2], [1,1], [1,1], [1,1]], NN).
 
-% Una sorpresa (tarda +-60 segundos, y ofrece una versión sonriente y otra seria (?)).
+% Una sorpresa (tarda +-60 segundos). En la última línea hay un spoiler de quién es, en caso de no reconocerlo.
 nn(15, NN) :- armarNono(
 	[
 [	25
@@ -234,7 +234,7 @@ nn(15, NN) :- armarNono(
 ],[
 ],[	4, 3
 ],[	4, 2
-],[	4, 1, 3
+],[	5, 1, 3
 ],[	2, 2
 ],[	3, 2
 ],[	1, 4, 2
@@ -247,7 +247,7 @@ nn(15, NN) :- armarNono(
 [
 ],[	6,2
 ],[	5,3
-],[	3,2,1
+],[	3,2,1,1
 ],[	2,1,1,1,1
 ],[	2,1,1,1,1
 ],[	2,1,1,1,1
@@ -336,3 +336,5 @@ mostrarCelda(C) :- var(C), write('¿?').
 
 %! tam(+N, -T).
 tam(N, (F, C)) :- nn(N, nono([M | Ms], _)), length([M | Ms], F), length(M, C).
+
+% El del test 15 es Alan Turing, por si no quedó muy fidedigno.
