@@ -337,4 +337,4 @@ mostrarCelda(C) :- var(C), write('¿?').
 %! tam(+N, -T).
 tam(N, (F, C)) :- nn(N, nono([M | Ms], _)), length([M | Ms], F), length(M, C).
 
-% El del test 15 es Alan Turing, por si no quedó muy fidedigno.
+% El del nonograma 15 es Alan Turing, por si quedó irreconociblemente pixelado.
