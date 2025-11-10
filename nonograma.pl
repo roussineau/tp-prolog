@@ -19,7 +19,7 @@ transponer(M, [Fila | Filas]) :-
     maplist(headTail, M, Fila, Restos),
     transponer(Restos, Filas).
 
-%! headTail(?List, ?Head, ?Tail)
+%! headTail(+List, -Head, -Tail)
 headTail([H | T], H, T).
 
 
@@ -38,32 +38,41 @@ zipR([R|RT], [L|LT], [r(R,L)|T]) :- zipR(RT, LT, T).
 
 
 % Ejercicio 4
+/*
+	Basándonos en el tip 3, primero vamos a crear la lista de blancos,
+	que sería una versión correspondiente a la lista de negros dada por
+	la restricción, y luego vamos a zipearla con la lista de negros. Eso
+	nos va a dar una lista de longitud impar (si la lista de negros mide
+	k, la de blancos mide k+1) que nos dirá cómo vamos a ir pintando las
+	celdas, empezando por blancos, luego negros... y así alternadamente.
+
+	Para crear la mencionada lista de blancos, vamos a generar todas las
+	listas de longitud k+1 que suman `cantidad de celdas - cantidad
+	de celdas negras` cuyos elementos sean >=0, y al final filtraremos
+	las que tienen ceros en el medio (esas no son válidas).
+*/
 %! pintadasValidas(+R).
 pintadasValidas(r(Negros, Celdas)) :-
-	length(Celdas, CantCeldas), % esto seguro que lo tengo que tener, sino no tiene sentido pintar algo que no conozco su longitud
+	length(Celdas, CantCeldas),  
 	listaBlancos(Negros, CantCeldas, Blancos),
-	zip(Blancos, Negros, Pintadas),
+	zip(Blancos, Negros, Pintadas), % Pintadas nos dice cuántos blancos pintar, luego cuántos negros... así alternadamente.
 	pintarBlanco(Pintadas, Celdas).
 
 %! listaBlancos(+ListaNegros, +CantCeldas, -ListaBlancos).
 listaBlancos([], CantCeldas, [CantCeldas]).
 listaBlancos(ListaNegros, CantCeldas, [Principio | ConFinal]) :-
-	length(ListaNegros, CantNegros),
-	sumlist(ListaNegros, SumaNegros),
-	CantBlancos is CantNegros + 1,
-	SumaBlancos is CantCeldas - SumaNegros,
-	generarListas(CantBlancos, SumaBlancos, [Principio | ConFinal]),
-	append(Medio, [_], ConFinal),
+	length(ListaNegros, CantNegros), sumlist(ListaNegros, SumaNegros),
+	CantBlancos is CantNegros + 1, SumaBlancos is CantCeldas - SumaNegros,
+	generarListasLongitudSuma(CantBlancos, SumaBlancos, [Principio | ConFinal]),
+	append(Medio, [_], ConFinal), % Acá verificamos que el medio de la lista (la lista sin su head y last) tenga todos números mayores que cero
 	not(member(0, Medio)).
 
-%! generarListas(+Longitud, +Suma, -Lista).
-generarListas(0, _, []).
-generarListas(L, Suma, [I | Resto]) :-
-	L > 0,
-	between(0, Suma, I),
-	SiguienteSuma is Suma - I,
-	Lm1 is L-1,
-	generarListas(Lm1, SiguienteSuma, Resto),
+%! generarListasLongitudSuma(+Longitud, +Suma, -Lista).
+generarListasLongitudSuma(0, _, []).
+generarListasLongitudSuma(Longitud, Suma, [I | Resto]) :-
+	Longitud > 0, between(0, Suma, I),
+	SiguienteSuma is Suma - I, Lm1 is Longitud-1,
+	generarListasLongitudSuma(Lm1, SiguienteSuma, Resto),
 	sumlist([I | Resto], Suma).
 
 %! zip(+L1, +L2, -L3).
@@ -157,10 +166,10 @@ resolverDeduciendo(NN) :-
 	deducirVariasPasadas(NN),
 	cantidadVariablesLibres(NN, C),
 	resolverDeduciendoCont(NN, C),
-	deducirVariasPasadas(NN).
+	deducirVariasPasadas(NN). % Verificar que el intento sea congruente con todas las restricciones.
 
-%! resolverDeduciendoCont(+NN, +CantFreeVars).
-resolverDeduciendoCont(_, 0).
+%! resolverDeduciendoCont(+NN, +CantFreeVariables).
+resolverDeduciendoCont(_, 0). % Si tiene 0 FV, ya está resuelto.
 resolverDeduciendoCont(NN, FV) :-
 	FV > 0,
 	restriccionConMenosLibres(NN, R), !,
@@ -198,6 +207,78 @@ nn(11, NN) :- armarNono([[1, 1, 1, 1], [3, 3], [1, 1], [1, 1, 1, 1], [8], [6], [
 nn(12, NN) :- armarNono([[9], [1, 1, 1, 1], [10], [2, 1, 1], [1, 1, 1, 1], [1, 10], [1, 1, 1], [1, 1, 1], [1, 1, 1, 1, 1], [1, 9], [1, 2, 1, 1, 2], [2, 1, 1, 1, 1], [2, 1, 3, 1], [3, 1], [10]], [[], [9], [2, 2], [3, 1, 2], [1, 2, 1, 2], [3, 11], [1, 1, 1, 2, 1], [1, 1, 1, 1, 1, 1], [3, 1, 3, 1, 1], [1, 1, 1, 1, 1, 1], [1, 1, 1, 3, 1, 1], [3, 1, 1, 1, 1], [1, 1, 2, 1], [11], []], NN).
 nn(13, NN) :- armarNono([[2], [1,1], [1,1], [1,1], [1], [], [2], [1,1], [1,1], [1,1], [1]], [[1], [1,3], [3,1,1], [1,1,3], [3]], NN).
 nn(14, NN) :- armarNono([[1,1], [1,1], [1,1], [2]], [[2], [1,1], [1,1], [1,1]], NN).
+
+% Una sorpresa (tarda +- 67 segundos, y ofrece una versión sonriente y otra seria (?)).
+nn(15, NN) :- armarNono(
+	[
+[	25
+],[	6, 8
+],[	3, 9
+],[	2, 9
+],[	2, 10
+],[	1, 10
+],[	1, 10
+],[	10
+],[	9
+],[	9
+],[	2, 7, 9
+],[	3, 8, 8
+],[	3, 9, 2
+],[	4, 2
+],[	1, 1
+],[	2
+],[	2
+],[	
+],[	4, 1
+],[
+],[
+],[
+],[	4, 3
+],[	4, 2
+],[	4, 1, 3
+],[	2, 2
+],[	3, 2
+],[	1, 4, 2
+],[	13, 3
+],[	15, 6
+],[	10, 7
+]
+	],
+	[
+[
+],[	6,2
+],[	5,3
+],[	3,2,1
+],[	2,1,1,1,1
+],[	2,1,1,1,1
+],[	2,1,1,1,1
+],[	1,3,3,2
+],[	1,3,2,3
+],[	1,3,1,3
+],[	1,3,2,3
+],[	1,4,4
+],[	1,4,3
+],[	1,4,3
+],[	1,3,3
+],[	1,1,3
+],[	1,3
+],[	1,4
+],[	1,3
+],[	8,3
+],[	11,3
+],[	12,1,3
+],[	12,3
+],[	12,2,4,2
+],[	12,3,6
+],[	12,1,1,5
+],[	14,3
+],[	11,1,2
+],[	8,2
+],[	1
+]
+	],
+	NN).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                              %
